@@ -19,30 +19,6 @@ def read_ini(file_path):
 	}
 	return cfg
 
-cfg = read_ini("config.ini")
-exp_creds = cfg['creds']
-
-headers = {"content-type": "application/json"}
-
-exp_srv_list = []
-for k in cfg['exp_servers']:
-	x = cfg['exp_servers'][k].split(':')
-	exp_srv_list.append((x[0].strip(), x[1].strip()))
-
-# Prefix https to servers
-# print(exp_srv_list)
-for i,v in enumerate(exp_srv_list):
-	exp_srv_list[i] = ("https://" + v[0], v[1])
-# print(exp_srv_list)
-
-try:
-	if not re.search("^(start|stop|download)$", sys.argv[1]):
-		print(f"{sys.argv[1]} is not a valid argument!")
-		sys.exit(1)
-except IndexError:
-	print("Missing arguments!")
-	sys.exit(1)
-
 def log_put(url, exp_creds, headers, req_body):
 	url = url + "/api/provisioning/common/diagnosticlogging"
 	# req_body = {"Mode": mode}
@@ -79,6 +55,30 @@ def log_download(url, exp_creds, headers, req_body):
 	filename = filename.replace(':','_') # Replace : for _ due to Windows filename limitation
 	open(filename, 'wb').write(response.content)
 	print(f"Log saved: {filename}")
+
+cfg = read_ini("config.ini")
+exp_creds = cfg['creds']
+
+headers = {"content-type": "application/json"}
+
+exp_srv_list = []
+for k in cfg['exp_servers']:
+	x = cfg['exp_servers'][k].split(':')
+	exp_srv_list.append((x[0].strip(), x[1].strip()))
+
+# Prefix https to servers
+# print(exp_srv_list)
+for i,v in enumerate(exp_srv_list):
+	exp_srv_list[i] = ("https://" + v[0], v[1])
+# print(exp_srv_list)
+
+try:
+	if not re.search("^(start|stop|download)$", sys.argv[1]):
+		print(f"{sys.argv[1]} is not a valid argument!")
+		sys.exit(1)
+except IndexError:
+	print("Missing arguments!")
+	sys.exit(1)
 
 if sys.argv[1] == "start":
 	# Start logging on master servers
